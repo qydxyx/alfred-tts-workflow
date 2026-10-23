@@ -1,6 +1,6 @@
 # Alfred TTS
 
-Alfred 5 多引擎语音合成 Workflow。输入 `tts <文本>`，或对任意应用里选中的文字使用 Universal Action **Speak with Alfred TTS**。
+Alfred 5 多引擎语音合成 Workflow。输入 `tts <文本>`，或对选中文字打开 **Text Action**，输入 `tts`，选择 **Alfred TTS**。
 
 ## 安装
 
@@ -18,6 +18,8 @@ Alfred 5 多引擎语音合成 Workflow。输入 `tts <文本>`，或对任意�
 | `⌃↩` 或 `tts stop` | 停止播放 |
 
 `tts @edge` / `@openai` / `@aliyun` 可指定引擎。未配置的引擎不会出现在日常列表里。
+
+选中任意文本后打开 Alfred **Text Action**（Universal Actions），输入 `tts` 即可看到 **Alfred TTS**，回车后会带入这段文字并让你选引擎。也可以在 Workflow 画布里给左下角 Hotkey 绑定快捷键，直接朗读当前选中文本。
 
 ## 引擎
 

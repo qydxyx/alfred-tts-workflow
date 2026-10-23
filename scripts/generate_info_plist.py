@@ -17,6 +17,7 @@ SETUP_KW = "a11ed001-0001-4000-8000-000000000005"
 SETUP_RUN = "a11ed001-0001-4000-8000-000000000006"
 UA = "a11ed001-0001-4000-8000-000000000007"
 UA_RUN = "a11ed001-0001-4000-8000-000000000008"
+HOTKEY = "a11ed001-0001-4000-8000-000000000009"
 
 
 def script_filter(keyword: str, title: str, script: str, *, skip_ua: bool = True) -> dict:
@@ -81,17 +82,37 @@ def keyword(uid: str, word: str, title: str) -> dict:
 
 
 def universal_action() -> dict:
+    # Alfred stores these as accepts* (not camelCase). Wrong keys make Text Actions skip the trigger.
     return {
         "type": "alfred.workflow.trigger.universalaction",
         "uid": UA,
         "version": 1,
         "config": {
-            "acceptFile": False,
-            "acceptFolder": False,
-            "acceptText": True,
-            "acceptURL": False,
-            "multipleSelection": False,
-            "name": "Speak with Alfred TTS",
+            "acceptsfiles": False,
+            "acceptsmulti": 0,
+            "acceptstext": True,
+            "acceptsurls": True,
+            "name": "Alfred TTS",
+        },
+    }
+
+
+def selection_hotkey() -> dict:
+    return {
+        "type": "alfred.workflow.trigger.hotkey",
+        "uid": HOTKEY,
+        "version": 2,
+        "config": {
+            "action": 0,
+            "argument": 1,
+            "focusedappvariable": False,
+            "focusedappvariablename": "",
+            "hotkey": 0,
+            "hotmod": 0,
+            "hotstring": "",
+            "leftcursor": False,
+            "modsmode": 0,
+            "relatedAppsMode": 0,
         },
     }
 
@@ -154,13 +175,15 @@ def main() -> None:
         run_script(SETUP_RUN, "./scripts/bootstrap.sh setup"),
         universal_action(),
         run_script(UA_RUN, './scripts/bootstrap.sh speak "$1"'),
+        selection_hotkey(),
     ]
     connections = dict(
         [
             connect(FILTER, RUN),
             connect(CONFIG_FILTER, CONFIG_ACT),
             connect(SETUP_KW, SETUP_RUN),
-            connect(UA, UA_RUN),
+            connect(UA, FILTER),
+            connect(HOTKEY, UA_RUN),
         ]
     )
     plist = {
@@ -175,7 +198,7 @@ def main() -> None:
         "readme": (
             "输入 `tts <文本>` 朗读。默认引擎为免 Key 的 Edge TTS。\n\n"
             "↩ 播放 · ⌘↩ 复制音频文件 · ⌥↩ 保存并定位 · ⌃↩ 停止。\n"
-            "选中文本后使用 Universal Action「Speak with Alfred TTS」。\n"
+            "选中文本后打开 Text Action，输入 tts，选择 Alfred TTS。\n"
             "首次运行回车即可完成轻量初始化。Kokoro 仅在需要时按需下载。"
         ),
         "uidata": {
@@ -186,7 +209,8 @@ def main() -> None:
             SETUP_KW: {"xpos": 60, "ypos": 370},
             SETUP_RUN: {"xpos": 360, "ypos": 370},
             UA: {"xpos": 60, "ypos": 530},
-            UA_RUN: {"xpos": 360, "ypos": 530},
+            UA_RUN: {"xpos": 360, "ypos": 690},
+            HOTKEY: {"xpos": 60, "ypos": 690},
         },
         "userconfigurationconfig": [
             popup(
@@ -309,7 +333,7 @@ def main() -> None:
                 "http://127.0.0.1:8880/v1",
             ),
         ],
-        "version": "0.2.0",
+        "version": "0.2.1",
         "webaddress": "https://github.com/qydxyx/alfred-tts-workflow",
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)

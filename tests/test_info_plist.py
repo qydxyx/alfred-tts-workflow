@@ -25,6 +25,27 @@ def test_default_provider_includes_new_engines() -> None:
         assert engine in values
 
 
+def test_universal_action_accepts_text() -> None:
+    ua = next(
+        obj for obj in _plist()["objects"] if obj["type"] == "alfred.workflow.trigger.universalaction"
+    )
+    config = ua["config"]
+    assert config["acceptstext"] is True
+    assert config["acceptsurls"] is True
+    assert config["acceptsfiles"] is False
+    assert config["acceptsmulti"] == 0
+    assert config["name"] == "Alfred TTS"
+    assert "acceptText" not in config
+    connections = _plist()["connections"]
+    dests = [item["destinationuid"] for item in connections[ua["uid"]]]
+    filter_uid = next(
+        obj["uid"]
+        for obj in _plist()["objects"]
+        if obj["type"] == "alfred.workflow.input.scriptfilter" and obj["config"]["keyword"] == "tts"
+    )
+    assert filter_uid in dests
+
+
 def test_api_key_fields_exist() -> None:
     variables = {item["variable"] for item in _plist()["userconfigurationconfig"]}
     for name in (

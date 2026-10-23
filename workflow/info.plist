@@ -51,6 +51,19 @@
 		<array>
 			<dict>
 				<key>destinationuid</key>
+				<string>a11ed001-0001-4000-8000-000000000001</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>a11ed001-0001-4000-8000-000000000009</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
 				<string>a11ed001-0001-4000-8000-000000000008</string>
 				<key>modifiers</key>
 				<integer>0</integer>
@@ -270,18 +283,16 @@
 			<integer>1</integer>
 			<key>config</key>
 			<dict>
-				<key>acceptFile</key>
+				<key>acceptsfiles</key>
 				<false/>
-				<key>acceptFolder</key>
-				<false/>
-				<key>acceptText</key>
+				<key>acceptsmulti</key>
+				<integer>0</integer>
+				<key>acceptstext</key>
 				<true/>
-				<key>acceptURL</key>
-				<false/>
-				<key>multipleSelection</key>
-				<false/>
+				<key>acceptsurls</key>
+				<true/>
 				<key>name</key>
-				<string>Speak with Alfred TTS</string>
+				<string>Alfred TTS</string>
 			</dict>
 		</dict>
 		<dict>
@@ -307,12 +318,43 @@
 				<integer>0</integer>
 			</dict>
 		</dict>
+		<dict>
+			<key>type</key>
+			<string>alfred.workflow.trigger.hotkey</string>
+			<key>uid</key>
+			<string>a11ed001-0001-4000-8000-000000000009</string>
+			<key>version</key>
+			<integer>2</integer>
+			<key>config</key>
+			<dict>
+				<key>action</key>
+				<integer>0</integer>
+				<key>argument</key>
+				<integer>1</integer>
+				<key>focusedappvariable</key>
+				<false/>
+				<key>focusedappvariablename</key>
+				<string></string>
+				<key>hotkey</key>
+				<integer>0</integer>
+				<key>hotmod</key>
+				<integer>0</integer>
+				<key>hotstring</key>
+				<string></string>
+				<key>leftcursor</key>
+				<false/>
+				<key>modsmode</key>
+				<integer>0</integer>
+				<key>relatedAppsMode</key>
+				<integer>0</integer>
+			</dict>
+		</dict>
 	</array>
 	<key>readme</key>
 	<string>输入 `tts &lt;文本&gt;` 朗读。默认引擎为免 Key 的 Edge TTS。
 
 ↩ 播放 · ⌘↩ 复制音频文件 · ⌥↩ 保存并定位 · ⌃↩ 停止。
-选中文本后使用 Universal Action「Speak with Alfred TTS」。
+选中文本后打开 Text Action，输入 tts，选择 Alfred TTS。
 首次运行回车即可完成轻量初始化。Kokoro 仅在需要时按需下载。</string>
 	<key>uidata</key>
 	<dict>
@@ -370,7 +412,14 @@
 			<key>xpos</key>
 			<integer>360</integer>
 			<key>ypos</key>
-			<integer>530</integer>
+			<integer>690</integer>
+		</dict>
+		<key>a11ed001-0001-4000-8000-000000000009</key>
+		<dict>
+			<key>xpos</key>
+			<integer>60</integer>
+			<key>ypos</key>
+			<integer>690</integer>
 		</dict>
 	</dict>
 	<key>userconfigurationconfig</key>
@@ -913,7 +962,7 @@
 		</dict>
 	</array>
 	<key>version</key>
-	<string>0.2.0</string>
+	<string>0.2.1</string>
 	<key>webaddress</key>
 	<string>https://github.com/qydxyx/alfred-tts-workflow</string>
 </dict>
