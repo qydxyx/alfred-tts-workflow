@@ -1,14 +1,26 @@
 from __future__ import annotations
 
 from alfred_tts.config import Settings
+from alfred_tts.providers.aliyun import AliyunTTSProvider
 from alfred_tts.providers.base import TTSProvider
+from alfred_tts.providers.deepgram import DeepgramTTSProvider
 from alfred_tts.providers.edge import EdgeTTSProvider
+from alfred_tts.providers.elevenlabs import ElevenLabsTTSProvider
 from alfred_tts.providers.gemini import GeminiTTSProvider
 from alfred_tts.providers.kokoro import KokoroProvider
+from alfred_tts.providers.openai import OpenAITTSProvider
+from alfred_tts.providers.volcengine import VolcengineTTSProvider
+from alfred_tts.providers.xai import XAITTSProvider
 
 PROVIDERS: tuple[type[TTSProvider], ...] = (
     EdgeTTSProvider,
     GeminiTTSProvider,
+    OpenAITTSProvider,
+    ElevenLabsTTSProvider,
+    DeepgramTTSProvider,
+    XAITTSProvider,
+    AliyunTTSProvider,
+    VolcengineTTSProvider,
     KokoroProvider,
 )
 

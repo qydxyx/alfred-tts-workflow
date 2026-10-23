@@ -64,7 +64,7 @@
 	<key>createdby</key>
 	<string>alfred-tts-workflow</string>
 	<key>description</key>
-	<string>Multi-provider TTS for Alfred 5 (Edge / Gemini / Kokoro)</string>
+	<string>Multi-provider TTS for Alfred 5</string>
 	<key>disabled</key>
 	<false/>
 	<key>name</key>
@@ -399,6 +399,30 @@
 						<string>gemini</string>
 					</array>
 					<array>
+						<string>OpenAI TTS</string>
+						<string>openai</string>
+					</array>
+					<array>
+						<string>ElevenLabs</string>
+						<string>elevenlabs</string>
+					</array>
+					<array>
+						<string>Deepgram</string>
+						<string>deepgram</string>
+					</array>
+					<array>
+						<string>xAI Grok</string>
+						<string>xai</string>
+					</array>
+					<array>
+						<string>阿里云百炼</string>
+						<string>aliyun</string>
+					</array>
+					<array>
+						<string>火山引擎</string>
+						<string>volcengine</string>
+					</array>
+					<array>
 						<string>Kokoro</string>
 						<string>kokoro</string>
 					</array>
@@ -432,7 +456,7 @@
 			<key>label</key>
 			<string>海外代理</string>
 			<key>description</key>
-			<string>例如 http://127.0.0.1:7890。Gemini / Edge 走代理；本地 Kokoro API 直连。</string>
+			<string>例如 http://127.0.0.1:7890。海外引擎走代理；阿里云 / 火山引擎 / 本地 Kokoro 直连。</string>
 			<key>type</key>
 			<string>textfield</string>
 			<key>config</key>
@@ -517,6 +541,327 @@
 		</dict>
 		<dict>
 			<key>variable</key>
+			<string>OPENAI_API_KEY</string>
+			<key>label</key>
+			<string>OpenAI API Key</string>
+			<key>description</key>
+			<string>填写后列表中出现 OpenAI TTS</string>
+			<key>type</key>
+			<string>textfield</string>
+			<key>config</key>
+			<dict>
+				<key>defaultvalue</key>
+				<string></string>
+				<key>placeholder</key>
+				<string></string>
+				<key>required</key>
+				<false/>
+				<key>trim</key>
+				<true/>
+			</dict>
+		</dict>
+		<dict>
+			<key>variable</key>
+			<string>OPENAI_BASE_URL</string>
+			<key>label</key>
+			<string>OpenAI Base URL</string>
+			<key>description</key>
+			<string>兼容 /v1/audio/speech 的网关，可留空使用官方地址</string>
+			<key>type</key>
+			<string>textfield</string>
+			<key>config</key>
+			<dict>
+				<key>defaultvalue</key>
+				<string>https://api.openai.com/v1</string>
+				<key>placeholder</key>
+				<string>https://api.openai.com/v1</string>
+				<key>required</key>
+				<false/>
+				<key>trim</key>
+				<true/>
+			</dict>
+		</dict>
+		<dict>
+			<key>variable</key>
+			<string>OPENAI_MODEL</string>
+			<key>label</key>
+			<string>OpenAI 模型</string>
+			<key>description</key>
+			<string>gpt-4o-mini-tts 支持语气指令；tts-1 更低延迟</string>
+			<key>type</key>
+			<string>popupbutton</string>
+			<key>config</key>
+			<dict>
+				<key>defaultvalue</key>
+				<string>gpt-4o-mini-tts</string>
+				<key>pairs</key>
+				<array>
+					<array>
+						<string>gpt-4o-mini-tts</string>
+						<string>gpt-4o-mini-tts</string>
+					</array>
+					<array>
+						<string>tts-1</string>
+						<string>tts-1</string>
+					</array>
+					<array>
+						<string>tts-1-hd</string>
+						<string>tts-1-hd</string>
+					</array>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>variable</key>
+			<string>OPENAI_INSTRUCTIONS</string>
+			<key>label</key>
+			<string>OpenAI 语气</string>
+			<key>description</key>
+			<string>仅 gpt-4o-mini-tts 生效，例如 Speak in a calm, clear tone</string>
+			<key>type</key>
+			<string>textfield</string>
+			<key>config</key>
+			<dict>
+				<key>defaultvalue</key>
+				<string></string>
+				<key>placeholder</key>
+				<string>Speak in a calm, clear tone</string>
+				<key>required</key>
+				<false/>
+				<key>trim</key>
+				<true/>
+			</dict>
+		</dict>
+		<dict>
+			<key>variable</key>
+			<string>ELEVENLABS_API_KEY</string>
+			<key>label</key>
+			<string>ElevenLabs API Key</string>
+			<key>description</key>
+			<string>填写后列表中出现 ElevenLabs</string>
+			<key>type</key>
+			<string>textfield</string>
+			<key>config</key>
+			<dict>
+				<key>defaultvalue</key>
+				<string></string>
+				<key>placeholder</key>
+				<string></string>
+				<key>required</key>
+				<false/>
+				<key>trim</key>
+				<true/>
+			</dict>
+		</dict>
+		<dict>
+			<key>variable</key>
+			<string>ELEVENLABS_MODEL</string>
+			<key>label</key>
+			<string>ElevenLabs 模型</string>
+			<key>description</key>
+			<string>flash 更低延迟；multilingual_v2 更细腻</string>
+			<key>type</key>
+			<string>popupbutton</string>
+			<key>config</key>
+			<dict>
+				<key>defaultvalue</key>
+				<string>eleven_flash_v2_5</string>
+				<key>pairs</key>
+				<array>
+					<array>
+						<string>eleven_flash_v2_5</string>
+						<string>eleven_flash_v2_5</string>
+					</array>
+					<array>
+						<string>eleven_multilingual_v2</string>
+						<string>eleven_multilingual_v2</string>
+					</array>
+					<array>
+						<string>eleven_v3</string>
+						<string>eleven_v3</string>
+					</array>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>variable</key>
+			<string>DEEPGRAM_API_KEY</string>
+			<key>label</key>
+			<string>Deepgram API Key</string>
+			<key>description</key>
+			<string>填写后列表中出现 Deepgram Aura-2</string>
+			<key>type</key>
+			<string>textfield</string>
+			<key>config</key>
+			<dict>
+				<key>defaultvalue</key>
+				<string></string>
+				<key>placeholder</key>
+				<string></string>
+				<key>required</key>
+				<false/>
+				<key>trim</key>
+				<true/>
+			</dict>
+		</dict>
+		<dict>
+			<key>variable</key>
+			<string>XAI_API_KEY</string>
+			<key>label</key>
+			<string>xAI API Key</string>
+			<key>description</key>
+			<string>填写后列表中出现 xAI Grok Voice</string>
+			<key>type</key>
+			<string>textfield</string>
+			<key>config</key>
+			<dict>
+				<key>defaultvalue</key>
+				<string></string>
+				<key>placeholder</key>
+				<string></string>
+				<key>required</key>
+				<false/>
+				<key>trim</key>
+				<true/>
+			</dict>
+		</dict>
+		<dict>
+			<key>variable</key>
+			<string>DASHSCOPE_API_KEY</string>
+			<key>label</key>
+			<string>阿里云百炼 API Key</string>
+			<key>description</key>
+			<string>DashScope Key，填写后出现 CosyVoice</string>
+			<key>type</key>
+			<string>textfield</string>
+			<key>config</key>
+			<dict>
+				<key>defaultvalue</key>
+				<string></string>
+				<key>placeholder</key>
+				<string></string>
+				<key>required</key>
+				<false/>
+				<key>trim</key>
+				<true/>
+			</dict>
+		</dict>
+		<dict>
+			<key>variable</key>
+			<string>DASHSCOPE_BASE_URL</string>
+			<key>label</key>
+			<string>百炼 Base URL</string>
+			<key>description</key>
+			<string>国内默认北京；国际站改为 dashscope-intl.aliyuncs.com/api/v1</string>
+			<key>type</key>
+			<string>textfield</string>
+			<key>config</key>
+			<dict>
+				<key>defaultvalue</key>
+				<string>https://dashscope.aliyuncs.com/api/v1</string>
+				<key>placeholder</key>
+				<string></string>
+				<key>required</key>
+				<false/>
+				<key>trim</key>
+				<true/>
+			</dict>
+		</dict>
+		<dict>
+			<key>variable</key>
+			<string>ALIYUN_MODEL</string>
+			<key>label</key>
+			<string>百炼模型</string>
+			<key>description</key>
+			<string>v3 带系统音色；v3.5 仅支持复刻/设计音色</string>
+			<key>type</key>
+			<string>popupbutton</string>
+			<key>config</key>
+			<dict>
+				<key>defaultvalue</key>
+				<string>cosyvoice-v3-flash</string>
+				<key>pairs</key>
+				<array>
+					<array>
+						<string>cosyvoice-v3-flash</string>
+						<string>cosyvoice-v3-flash</string>
+					</array>
+					<array>
+						<string>cosyvoice-v3-plus</string>
+						<string>cosyvoice-v3-plus</string>
+					</array>
+					<array>
+						<string>cosyvoice-v2</string>
+						<string>cosyvoice-v2</string>
+					</array>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>variable</key>
+			<string>VOLC_APPID</string>
+			<key>label</key>
+			<string>火山引擎 AppID</string>
+			<key>description</key>
+			<string>与 Token 一起填写后出现火山引擎</string>
+			<key>type</key>
+			<string>textfield</string>
+			<key>config</key>
+			<dict>
+				<key>defaultvalue</key>
+				<string></string>
+				<key>placeholder</key>
+				<string></string>
+				<key>required</key>
+				<false/>
+				<key>trim</key>
+				<true/>
+			</dict>
+		</dict>
+		<dict>
+			<key>variable</key>
+			<string>VOLC_TOKEN</string>
+			<key>label</key>
+			<string>火山引擎 Token</string>
+			<key>description</key>
+			<string>openspeech HTTP 合成鉴权</string>
+			<key>type</key>
+			<string>textfield</string>
+			<key>config</key>
+			<dict>
+				<key>defaultvalue</key>
+				<string></string>
+				<key>placeholder</key>
+				<string></string>
+				<key>required</key>
+				<false/>
+				<key>trim</key>
+				<true/>
+			</dict>
+		</dict>
+		<dict>
+			<key>variable</key>
+			<string>VOLC_CLUSTER</string>
+			<key>label</key>
+			<string>火山引擎 Cluster</string>
+			<key>description</key>
+			<string>普通音色 volcano_tts；豆包 ICL 音色会自动切到 volcano_icl</string>
+			<key>type</key>
+			<string>textfield</string>
+			<key>config</key>
+			<dict>
+				<key>defaultvalue</key>
+				<string>volcano_tts</string>
+				<key>placeholder</key>
+				<string></string>
+				<key>required</key>
+				<false/>
+				<key>trim</key>
+				<true/>
+			</dict>
+		</dict>
+		<dict>
+			<key>variable</key>
 			<string>KOKORO_MODE</string>
 			<key>label</key>
 			<string>Kokoro 模式</string>
@@ -568,7 +913,7 @@
 		</dict>
 	</array>
 	<key>version</key>
-	<string>0.1.2</string>
+	<string>0.2.0</string>
 	<key>webaddress</key>
 	<string>https://github.com/qydxyx/alfred-tts-workflow</string>
 </dict>

@@ -28,8 +28,8 @@ def test_filter_lists_edge_first(monkeypatch, capsys) -> None:
     data = _run_filter(monkeypatch, capsys, "你好，欢迎使用 Alfred TTS")
     titles = [item["title"] for item in data["items"]]
     assert any("Edge TTS" in title for title in titles)
-    assert all("Gemini" not in title for title in titles)
-    assert all("Kokoro" not in title for title in titles)
+    hidden = ("Gemini", "OpenAI", "ElevenLabs", "Deepgram", "xAI", "阿里云", "火山", "Kokoro")
+    assert all(all(name not in title for title in titles) for name in hidden)
     item = data["items"][0]
     assert "cmd" in item["mods"]
     assert "alt" in item["mods"]
@@ -45,6 +45,20 @@ def test_filter_gemini_hidden_until_key(monkeypatch, capsys) -> None:
     data = _run_filter(monkeypatch, capsys, "hello")
     titles = [item["title"] for item in data["items"]]
     assert any("Gemini" in title for title in titles)
+
+
+def test_filter_openai_appears_with_key(monkeypatch, capsys) -> None:
+    monkeypatch.setenv("OPENAI_API_KEY", "test-key")
+    data = _run_filter(monkeypatch, capsys, "hello")
+    titles = [item["title"] for item in data["items"]]
+    assert any("OpenAI" in title for title in titles)
+
+
+def test_filter_at_unknown_lists_ids(monkeypatch, capsys) -> None:
+    data = _run_filter(monkeypatch, capsys, "@nope 你好")
+    subtitle = data["items"][0]["subtitle"]
+    assert "openai" in subtitle
+    assert "volcengine" in subtitle
 
 
 def test_filter_at_kokoro_shows_install_cards(monkeypatch, capsys) -> None:

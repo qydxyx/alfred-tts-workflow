@@ -132,7 +132,7 @@ def _cmd_filter(query: str) -> AlfredResponse:
             items=[
                 AlfredItem(
                     title="输入要朗读的文本",
-                    subtitle="tts 你好  ·  tts @gemini 你好  ·  tts stop",
+                    subtitle="tts 你好  ·  tts @openai 你好  ·  tts stop",
                     valid=False,
                 )
             ]
@@ -146,7 +146,7 @@ def _cmd_filter(query: str) -> AlfredResponse:
                 items=[
                     AlfredItem(
                         title=f"未知引擎 @{parsed.provider}",
-                        subtitle="可用: edge / gemini / kokoro",
+                        subtitle="可用: " + " / ".join(item.id for item in registry.all()),
                         valid=False,
                     )
                 ]

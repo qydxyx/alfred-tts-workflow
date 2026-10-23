@@ -17,13 +17,21 @@ Alfred 5 多引擎语音合成 Workflow。输入 `tts <文本>`，或对任意�
 | `⌥↩` | 保存到导出目录并在 Finder 中高亮 |
 | `⌃↩` 或 `tts stop` | 停止播放 |
 
-`tts @edge` / `@gemini` / `@kokoro` 可指定引擎。未配置的引擎不会出现在日常列表里。
+`tts @edge` / `@openai` / `@aliyun` 可指定引擎。未配置的引擎不会出现在日常列表里。
 
 ## 引擎
 
 - **Edge TTS**：开箱即用，中文默认晓晓，英文默认 Aria。
-- **Gemini TTS**：在 Workflow 配置里填写 `GEMINI_API_KEY`。默认 `gemini-3.8-flash-lite-tts`。
+- **Gemini TTS**：`GEMINI_API_KEY`。默认 `gemini-3.8-flash-lite-tts`。
+- **OpenAI TTS**：`OPENAI_API_KEY`。默认 `gpt-4o-mini-tts` / `coral`，可改 `OPENAI_BASE_URL`。
+- **ElevenLabs**：`ELEVENLABS_API_KEY`。默认 Flash v2.5 / Rachel。
+- **Deepgram**：`DEEPGRAM_API_KEY`。Aura-2 英文音色（`aura-2-thalia-en`）。
+- **xAI Grok**：`XAI_API_KEY`。默认 `eve`，中文文本自动 `language=zh`。
+- **阿里云百炼**：`DASHSCOPE_API_KEY`。CosyVoice `cosyvoice-v3-flash` / 龙安洋，国内直连。
+- **火山引擎**：`VOLC_APPID` + `VOLC_TOKEN`。openspeech HTTP，ICL 音色自动切 `volcano_icl`。
 - **Kokoro**：按需安装本地 ONNX（FP32 ~379MB / INT8 ~167MB），或直连本地 `http://127.0.0.1:8880/v1`。
+
+海外引擎（Edge / Gemini / OpenAI / ElevenLabs / Deepgram / xAI）走 `PROXY_URL`；阿里云、火山引擎与本地 Kokoro 直连。
 
 设置入口：`tts-set`。环境修复：`tts-setup`。
 
