@@ -24,9 +24,55 @@ Alfred 5 多引擎语音合成 Workflow。输入 `tts <文本>`，或对选中�
 ## 引擎
 
 - **Edge TTS**：开箱即用，中文默认晓晓，英文默认 Aria。
-- **Gemini TTS**：`GEMINI_API_KEY`。默认 `gemini-3.8-flash-lite-tts`。
+- **Gemini TTS**：付费 API，`GEMINI_API_KEY`。默认 `gemini-3.8-flash-lite-tts` / `Kore`。预置音色见下文。
 - **OpenAI TTS**：`OPENAI_API_KEY`。默认 `gpt-4o-mini-tts` / `coral`，可改 `OPENAI_BASE_URL`。
-- **ElevenLabs**：`ELEVENLABS_API_KEY`。默认 Flash v2.5 / Rachel。
+- **ElevenLabs**：`ELEVENLABS_API_KEY`。默认 Flash v2.5。单次覆盖音色用 `tts @elevenlabs voice:<VoiceID> 文本`（也接受 `v:` 或 `#`）。`ELEVENLABS_VOICE_ID` 是默认 Voice ID；`tts-set` 里选过的音色优先于这项配置。免费 API 不能用 Voice Library，可用音色见下文。
+
+## ElevenLabs 免费 API 音色
+
+2026-11-06 用免费 Key、`eleven_flash_v2_5` 实测，下列 Default 音色返回了音频。留空时工作流使用 Sarah（`EXAVITQu4vr4xnSDxMaL`）。官网 Playground 里的 Voice Library / 社区音色（例如 Lulu `itMkRQx56fOF4CJe1D0C`）会返回 402。Rachel（`21m00Tcm4TlvDq8ikWAM`）现在也算库音色，免费 API 同样 402。
+
+官方说明：这些 Default 音色只对 2026 年 3 月前注册的账号开放，并在 2026-12-31 失效。替代音色在 Voice Library，免费 API 不能用。
+
+| 音色 | Voice ID |
+| --- | --- |
+| Roger | `CwhRBWXzGAHq8TQ4Fs17` |
+| Sarah | `EXAVITQu4vr4xnSDxMaL` |
+| Laura | `FGY2WhTYpPnrIDTdsKH5` |
+| Charlie | `IKne3meq5aSn9XLyUdCD` |
+| George | `JBFqnCBsd6RMkjVDRZzb` |
+| Callum | `N2lVS1w4EtoT3dr4eOWO` |
+| River | `SAz9YHcvj6GT2YYXdXww` |
+| Harry | `SOYHLrjzK2X1ezoPC6cr` |
+| Liam | `TX3LPaxmHKxFdv7VOQHJ` |
+| Alice | `Xb7hH8MSUJpSbSDYk0k2` |
+| Matilda | `XrExE9yKIg1WjnnlVkGX` |
+| Will | `bIHbv24MWmeRgasZH58o` |
+| Jessica | `cgSgspJ2msm6clMCkdW9` |
+| Eric | `cjVigY5qzO86Huf0OWal` |
+| Chris | `iP95p4xoKVk53GoZ742B` |
+| Brian | `nPczCjzI2devNBz1zQrb` |
+| Daniel | `onwK4e9ZLuTAKqWW03F9` |
+| Lily | `pFZP5JQG7iQjIQuC4Bku` |
+| Bill | `pqHfZKP75CvOlQylNhV4` |
+| Adam | `pNInz6obpgDQGcFmaJgB` |
+
+## Gemini 付费 API 音色
+
+`gemini-3.8-flash-lite-tts` 与 `gemini-3.8-flash-tts` 使用同一套预置音色名。下面是官方 30 个 studio voice。`tts-set` 里目前列出 Kore、Puck、Aoede、Charon、Fenrir、Leda、Orus、Zephyr，其余可以用 `tts @gemini voice:音色名 文本`。
+
+| 音色 | 特点 | 音色 | 特点 | 音色 | 特点 |
+| --- | --- | --- | --- | --- | --- |
+| Zephyr | Bright | Puck | Upbeat | Charon | Informative |
+| Kore | Firm | Fenrir | Excitable | Leda | Youthful |
+| Orus | Firm | Aoede | Breezy | Callirrhoe | Easy-going |
+| Autonoe | Bright | Enceladus | Breathy | Iapetus | Clear |
+| Umbriel | Easy-going | Algieba | Smooth | Despina | Smooth |
+| Erinome | Clear | Algenib | Gravelly | Rasalgethi | Informative |
+| Laomedeia | Upbeat | Achernar | Soft | Alnilam | Firm |
+| Schedar | Even | Gacrux | Mature | Pulcherrima | Forward |
+| Achird | Friendly | Zubenelgenubi | Casual | Vindemiatrix | Gentle |
+| Sadachbia | Lively | Sadaltager | Knowledgeable | Sulafat | Warm |
 - **Deepgram**：`DEEPGRAM_API_KEY`。Aura-2 英文音色（`aura-2-thalia-en`）。
 - **xAI Grok**：`XAI_API_KEY`。默认 `eve`，中文文本自动 `language=zh`。
 - **阿里云百炼**：`DASHSCOPE_API_KEY`。CosyVoice `cosyvoice-v3-flash` / 龙安洋，国内直连。
@@ -34,6 +80,8 @@ Alfred 5 多引擎语音合成 Workflow。输入 `tts <文本>`，或对选中�
 - **Kokoro**：按需安装本地 ONNX（FP32 ~379MB / INT8 ~167MB），或直连本地 `http://127.0.0.1:8880/v1`。
 
 海外引擎（Edge / Gemini / OpenAI / ElevenLabs / Deepgram / xAI）走 `PROXY_URL`；阿里云、火山引擎与本地 Kokoro 直连。
+
+语速在 Workflow 配置的 **语速倍率**（`SPEECH_RATE`，默认 `1.0`）。Edge、OpenAI（0.25–4）、ElevenLabs Flash 与 Multilingual（接口上限 0.7–1.2，超出按边界取值）、阿里云 CosyVoice（0.5–2）、火山引擎、Kokoro 会按倍率合成。Eleven v3、v4、v4 Turbo、Gemini、Deepgram、xAI 没有语速参数，选了非 1.0 仍按原速朗读，并弹出说明。Gemini 只能把快慢写进 `GEMINI_STYLE`，例如 `speaking rapidly`。
 
 设置入口：`tts-set`。环境修复：`tts-setup`。
 

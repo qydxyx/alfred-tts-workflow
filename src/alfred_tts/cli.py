@@ -132,7 +132,7 @@ def _cmd_filter(query: str) -> AlfredResponse:
             items=[
                 AlfredItem(
                     title="输入要朗读的文本",
-                    subtitle="tts 你好  ·  tts @openai 你好  ·  tts stop",
+                    subtitle="tts 你好  ·  tts @elevenlabs voice:VoiceID 你好  ·  tts stop",
                     valid=False,
                 )
             ]
@@ -300,18 +300,37 @@ def _cmd_setup() -> int:
         return 1
 
 
-def _synthesize(provider_id: str, text: str, voice: str = "") -> Path:
+def _request_for(provider, text: str, voice: str) -> SynthesizeRequest:
     settings = load_settings()
-    registry = ProviderRegistry(settings)
-    provider = registry.get(provider_id)
+    draft = SynthesizeRequest(provider=provider.id, text=text)
     request = SynthesizeRequest(
         provider=provider.id,
         text=text,
         voice=voice or voice_for(settings, provider.id),
-        model=provider.resolved_model(SynthesizeRequest(provider=provider.id, text=text)),
-        style=provider.resolved_style(SynthesizeRequest(provider=provider.id, text=text)),
+        model=provider.resolved_model(draft),
+        style=provider.resolved_style(draft),
+        speed=settings.speech_rate,
     )
     request.voice = provider.resolved_voice(request)
+    request.speed = provider.resolved_speed(request)
+    return request
+
+
+def _synthesize(provider_id: str, text: str, voice: str = "") -> Path:
+    settings = load_settings()
+    registry = ProviderRegistry(settings)
+    provider = registry.get(provider_id)
+    request = _request_for(provider, text, voice)
+    notice = provider.speed_notice(
+        SynthesizeRequest(
+            provider=provider.id,
+            text=text,
+            model=request.model,
+            speed=settings.speech_rate,
+        )
+    )
+    if notice:
+        notify("Alfred TTS", notice)
     cached = lookup(request)
     if cached is not None:
         return cached
@@ -322,15 +341,7 @@ def _synthesize(provider_id: str, text: str, voice: str = "") -> Path:
 
 
 def _synth_item(provider, parsed: ParsedQuery, default_id: str) -> AlfredItem:
-    settings = load_settings()
-    request = SynthesizeRequest(
-        provider=provider.id,
-        text=parsed.text,
-        voice=voice_for(settings, provider.id),
-        model=provider.resolved_model(SynthesizeRequest(provider=provider.id, text=parsed.text)),
-        style=provider.resolved_style(SynthesizeRequest(provider=provider.id, text=parsed.text)),
-    )
-    request.voice = provider.resolved_voice(request)
+    request = _request_for(provider, parsed.text, parsed.voice)
     cached = lookup(request) is not None
     prefix = "⚡ 已缓存 · " if cached else ""
     default_mark = "（默认）" if provider.id == default_id else ""

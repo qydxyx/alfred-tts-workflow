@@ -23,15 +23,27 @@ def body_error(response: httpx.Response) -> str:
     except Exception:
         text = (response.text or "")[:400].strip()
         return text or f"HTTP {response.status_code}"
+    message = _error_message(data)
+    return message or str(data)[:400]
+
+
+def _error_message(data: Any) -> str:
+    if isinstance(data, str):
+        return data.strip()
+    if isinstance(data, list):
+        for item in data:
+            message = _error_message(item)
+            if message:
+                return message
+        return ""
     if isinstance(data, dict):
-        err = data.get("error")
-        if isinstance(err, dict) and err.get("message"):
-            return str(err["message"])
         for key in ("message", "msg", "detail", "error"):
-            value = data.get(key)
-            if isinstance(value, str) and value.strip():
-                return value
-    return str(data)[:400]
+            if key not in data:
+                continue
+            message = _error_message(data[key])
+            if message:
+                return message
+    return ""
 
 
 def audio_bytes(response: httpx.Response, label: str) -> bytes:

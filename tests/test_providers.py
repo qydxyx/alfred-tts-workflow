@@ -190,9 +190,102 @@ def test_elevenlabs_synthesize_mocked(monkeypatch, tmp_path: Path) -> None:
     )
     assert path.exists()
     _, url, payload = fake.calls[0]
-    assert "text-to-speech/21m00Tcm4TlvDq8ikWAM" in url
+    assert "text-to-speech/EXAVITQu4vr4xnSDxMaL" in url
     assert payload["headers"]["xi-api-key"] == "el-test"
     assert payload["json"]["model_id"] == "eleven_flash_v2_5"
+
+
+def test_body_error_reads_nested_detail_message() -> None:
+    from alfred_tts.http import body_error
+
+    response = FakeResponse(
+        content=b"{}",
+        status_code=402,
+        headers={"content-type": "application/json"},
+        json_data={
+            "detail": {
+                "code": "paid_plan_required",
+                "message": "Free users cannot use library voices via the API.",
+            }
+        },
+    )
+    assert body_error(response) == "Free users cannot use library voices via the API."
+
+
+def test_elevenlabs_free_plan_library_voice(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("ELEVENLABS_API_KEY", "el-test")
+    fake = FakeClient()
+    fake.response = FakeResponse(
+        content=b'{"detail":{"code":"paid_plan_required","message":"nope"}}',
+        status_code=402,
+        headers={"content-type": "application/json"},
+        json_data={"detail": {"code": "paid_plan_required", "message": "nope"}},
+    )
+    monkeypatch.setattr("alfred_tts.providers.elevenlabs.httpx_client", lambda *a, **k: fake)
+    try:
+        ElevenLabsTTSProvider(load_settings()).synthesize(
+            SynthesizeRequest(provider="elevenlabs", text="hello"),
+            tmp_path / "out",
+        )
+    except RuntimeError as exc:
+        message = str(exc)
+    else:
+        raise AssertionError("expected RuntimeError")
+    assert "免费套餐" in message
+    assert "ELEVENLABS_VOICE_ID" in message
+
+
+def test_elevenlabs_flash_sends_speed(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("ELEVENLABS_API_KEY", "el-test")
+    monkeypatch.setenv("ELEVENLABS_MODEL", "eleven_flash_v2_5")
+    fake = FakeClient()
+    monkeypatch.setattr("alfred_tts.providers.elevenlabs.httpx_client", lambda *a, **k: fake)
+    ElevenLabsTTSProvider(load_settings()).synthesize(
+        SynthesizeRequest(provider="elevenlabs", text="hello", speed=1.5),
+        tmp_path / "out",
+    )
+    payload = fake.calls[0][2]["json"]
+    assert payload["voice_settings"]["speed"] == 1.2
+
+
+def test_elevenlabs_v4_ignores_speed(monkeypatch) -> None:
+    monkeypatch.setenv("ELEVENLABS_API_KEY", "el-test")
+    monkeypatch.setenv("ELEVENLABS_MODEL", "eleven_v4")
+    provider = ElevenLabsTTSProvider(load_settings())
+    request = SynthesizeRequest(provider="elevenlabs", text="hello", speed=1.25)
+    assert provider.resolved_speed(request) == 1.0
+    assert "v4" in provider.speed_notice(request)
+
+
+def test_edge_rate_from_speed() -> None:
+    from alfred_tts.providers.edge import _edge_rate
+
+    assert _edge_rate(1.0) == "+0%"
+    assert _edge_rate(1.25) == "+25%"
+    assert _edge_rate(0.85) == "-15%"
+
+
+def test_gemini_speed_notice() -> None:
+    provider = GeminiTTSProvider(load_settings())
+    request = SynthesizeRequest(provider="gemini", text="hello", speed=1.25)
+    assert provider.resolved_speed(request) == 1.0
+    assert "Gemini" in provider.speed_notice(request)
+    assert provider.speed_notice(SynthesizeRequest(provider="gemini", text="hello")) == ""
+
+
+def test_elevenlabs_voice_id_from_settings_and_label(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("ELEVENLABS_API_KEY", "el-test")
+    monkeypatch.setenv("ELEVENLABS_VOICE_ID", "customVoiceId123")
+    provider = ElevenLabsTTSProvider(load_settings())
+    assert provider.default_voice() == "customVoiceId123"
+    assert provider.preset_voices()[0].label == "自定义 Voice ID"
+    fake = FakeClient()
+    monkeypatch.setattr("alfred_tts.providers.elevenlabs.httpx_client", lambda *a, **k: fake)
+    provider.synthesize(
+        SynthesizeRequest(provider="elevenlabs", text="hello", voice="George"),
+        tmp_path / "out",
+    )
+    assert "text-to-speech/JBFqnCBsd6RMkjVDRZzb" in fake.calls[0][1]
 
 
 def test_deepgram_synthesize_mocked(monkeypatch, tmp_path: Path) -> None:

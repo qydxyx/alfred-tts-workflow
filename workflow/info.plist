@@ -480,6 +480,44 @@
 		</dict>
 		<dict>
 			<key>variable</key>
+			<string>SPEECH_RATE</string>
+			<key>label</key>
+			<string>语速倍率</string>
+			<key>description</key>
+			<string>1.0 为原速。Edge、OpenAI、ElevenLabs Flash / Multilingual、阿里云、火山、Kokoro 生效。Eleven v3 / v4 / v4 Turbo、Gemini、Deepgram、xAI 不支持，仍按 1.0 朗读并提示。</string>
+			<key>type</key>
+			<string>popupbutton</string>
+			<key>config</key>
+			<dict>
+				<key>defaultvalue</key>
+				<string>1.0</string>
+				<key>pairs</key>
+				<array>
+					<array>
+						<string>0.85 稍慢</string>
+						<string>0.85</string>
+					</array>
+					<array>
+						<string>1.0 正常</string>
+						<string>1.0</string>
+					</array>
+					<array>
+						<string>1.15 稍快</string>
+						<string>1.15</string>
+					</array>
+					<array>
+						<string>1.25 快</string>
+						<string>1.25</string>
+					</array>
+					<array>
+						<string>1.5 更快</string>
+						<string>1.5</string>
+					</array>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>variable</key>
 			<string>EXPORT_DIR</string>
 			<key>label</key>
 			<string>导出目录</string>
@@ -704,11 +742,32 @@
 		</dict>
 		<dict>
 			<key>variable</key>
+			<string>ELEVENLABS_VOICE_ID</string>
+			<key>label</key>
+			<string>ElevenLabs Voice ID</string>
+			<key>description</key>
+			<string>默认 Sarah，免费 API 可用。单次可写 tts @elevenlabs voice:VoiceID 文本</string>
+			<key>type</key>
+			<string>textfield</string>
+			<key>config</key>
+			<dict>
+				<key>defaultvalue</key>
+				<string>EXAVITQu4vr4xnSDxMaL</string>
+				<key>placeholder</key>
+				<string>EXAVITQu4vr4xnSDxMaL</string>
+				<key>required</key>
+				<false/>
+				<key>trim</key>
+				<true/>
+			</dict>
+		</dict>
+		<dict>
+			<key>variable</key>
 			<string>ELEVENLABS_MODEL</string>
 			<key>label</key>
 			<string>ElevenLabs 模型</string>
 			<key>description</key>
-			<string>flash 更低延迟；multilingual_v2 更细腻</string>
+			<string>v4 质量最高；v4 turbo 实时；flash 更低延迟</string>
 			<key>type</key>
 			<string>popupbutton</string>
 			<key>config</key>
@@ -717,6 +776,14 @@
 				<string>eleven_flash_v2_5</string>
 				<key>pairs</key>
 				<array>
+					<array>
+						<string>eleven_v4</string>
+						<string>eleven_v4</string>
+					</array>
+					<array>
+						<string>eleven_v4_turbo</string>
+						<string>eleven_v4_turbo</string>
+					</array>
 					<array>
 						<string>eleven_flash_v2_5</string>
 						<string>eleven_flash_v2_5</string>
@@ -962,7 +1029,7 @@
 		</dict>
 	</array>
 	<key>version</key>
-	<string>0.2.1</string>
+	<string>0.2.2</string>
 	<key>webaddress</key>
 	<string>https://github.com/qydxyx/alfred-tts-workflow</string>
 </dict>

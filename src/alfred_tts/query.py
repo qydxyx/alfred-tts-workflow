@@ -7,11 +7,15 @@ _PROVIDER_RE = re.compile(r"^@([a-zA-Z0-9_-]+)(?:\s+|$)")
 _CJK_RE = re.compile(r"[\u3400-\u9fff\U00020000-\U0002a6df]")
 
 
+_VOICE_RE = re.compile(r"^(?:voice:|v:|#)([A-Za-z0-9_-]+)(?:\s+|$)")
+
+
 @dataclass(slots=True)
 class ParsedQuery:
     raw: str
     text: str
     provider: str | None = None
+    voice: str | None = None
     is_stop: bool = False
 
 
@@ -29,7 +33,13 @@ def parse_query(query: str) -> ParsedQuery:
     if match:
         provider = match.group(1).lower()
         rest = stripped[match.end() :].strip()
-    return ParsedQuery(raw=raw, text=rest, provider=provider)
+
+    voice = None
+    voice_match = _VOICE_RE.match(rest)
+    if voice_match:
+        voice = voice_match.group(1)
+        rest = rest[voice_match.end() :].strip()
+    return ParsedQuery(raw=raw, text=rest, provider=provider, voice=voice)
 
 
 def has_cjk(text: str) -> bool:

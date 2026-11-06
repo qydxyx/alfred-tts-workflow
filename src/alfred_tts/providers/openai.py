@@ -55,6 +55,9 @@ class OpenAITTSProvider(TTSProvider):
         instructions = self.resolved_style(request)
         if instructions and "tts-1" not in model:
             payload["instructions"] = instructions
+        speed = self.resolved_speed(request)
+        if abs(speed - 1.0) >= 0.001:
+            payload["speed"] = speed
         headers = {
             "Authorization": f"Bearer {self.settings.openai_api_key}",
             "Content-Type": "application/json",

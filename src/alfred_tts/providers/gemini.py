@@ -28,6 +28,14 @@ class GeminiTTSProvider(TTSProvider):
     def resolved_style(self, request: SynthesizeRequest) -> str:
         return request.style or self.settings.gemini_style
 
+    def resolved_speed(self, request: SynthesizeRequest) -> float:
+        return 1.0
+
+    def speed_notice(self, request: SynthesizeRequest) -> str:
+        if abs((request.speed or 1.0) - 1.0) < 0.001:
+            return ""
+        return "Gemini TTS 没有语速倍率，已按原速朗读。语速只能写在 GEMINI_STYLE 里，例如 speaking rapidly。"
+
     def preset_voices(self) -> list[VoicePreset]:
         return [
             VoicePreset("Kore", "Kore"),

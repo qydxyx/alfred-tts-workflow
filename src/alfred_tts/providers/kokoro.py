@@ -109,7 +109,7 @@ class KokoroProvider(TTSProvider):
                     "input": request.text,
                     "voice": voice,
                     "response_format": "wav",
-                    "speed": request.speed,
+                    "speed": self.resolved_speed(request),
                 },
             )
             response.raise_for_status()
@@ -140,9 +140,11 @@ class KokoroProvider(TTSProvider):
             g2p = zh.ZHG2P(version="1.1")
             phonemes, _ = g2p(request.text)
             samples, sample_rate = kokoro.create(
-                phonemes, voice=voice, speed=request.speed, is_phonemes=True
+                phonemes, voice=voice, speed=self.resolved_speed(request), is_phonemes=True
             )
         else:
-            samples, sample_rate = kokoro.create(request.text, voice=voice, speed=request.speed)
+            samples, sample_rate = kokoro.create(
+                request.text, voice=voice, speed=self.resolved_speed(request)
+            )
         sf.write(str(dest), samples, sample_rate)
         return dest

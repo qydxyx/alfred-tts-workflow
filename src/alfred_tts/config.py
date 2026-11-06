@@ -20,10 +20,21 @@ ALIYUN_MODEL_DEFAULT = "cosyvoice-v3-flash"
 VOLC_CLUSTER_DEFAULT = "volcano_tts"
 KOKORO_API_PROBE_TTL_S = 30.0
 MAX_CACHE_ITEMS = 200
+SPEECH_RATE_DEFAULT = 1.0
 
 
 def _env(name: str, default: str = "") -> str:
     return os.environ.get(name, default).strip()
+
+
+def parse_speech_rate(raw: str) -> float:
+    try:
+        value = float((raw or "").strip())
+    except ValueError:
+        return SPEECH_RATE_DEFAULT
+    if value <= 0:
+        return SPEECH_RATE_DEFAULT
+    return value
 
 
 def data_dir() -> Path:
@@ -93,6 +104,7 @@ class Settings:
     default_provider: str = DEFAULT_PROVIDER
     export_dir: str = EXPORT_DIR_DEFAULT
     proxy_url: str = ""
+    speech_rate: float = SPEECH_RATE_DEFAULT
     gemini_api_key: str = ""
     gemini_model: str = GEMINI_MODEL_DEFAULT
     gemini_style: str = ""
@@ -102,6 +114,7 @@ class Settings:
     openai_instructions: str = ""
     elevenlabs_api_key: str = ""
     elevenlabs_model: str = ELEVENLABS_MODEL_DEFAULT
+    elevenlabs_voice_id: str = ""
     deepgram_api_key: str = ""
     xai_api_key: str = ""
     dashscope_api_key: str = ""
@@ -130,6 +143,7 @@ def load_settings() -> Settings:
         default_provider=str(default_provider or DEFAULT_PROVIDER),
         export_dir=_env("EXPORT_DIR", EXPORT_DIR_DEFAULT) or EXPORT_DIR_DEFAULT,
         proxy_url=_env("PROXY_URL"),
+        speech_rate=parse_speech_rate(_env("SPEECH_RATE", str(SPEECH_RATE_DEFAULT))),
         gemini_api_key=_env("GEMINI_API_KEY"),
         gemini_model=_env("GEMINI_MODEL", GEMINI_MODEL_DEFAULT) or GEMINI_MODEL_DEFAULT,
         gemini_style=_env("GEMINI_STYLE"),
@@ -139,6 +153,7 @@ def load_settings() -> Settings:
         openai_instructions=_env("OPENAI_INSTRUCTIONS"),
         elevenlabs_api_key=_env("ELEVENLABS_API_KEY"),
         elevenlabs_model=_env("ELEVENLABS_MODEL", ELEVENLABS_MODEL_DEFAULT) or ELEVENLABS_MODEL_DEFAULT,
+        elevenlabs_voice_id=_env("ELEVENLABS_VOICE_ID"),
         deepgram_api_key=_env("DEEPGRAM_API_KEY"),
         xai_api_key=_env("XAI_API_KEY"),
         dashscope_api_key=_env("DASHSCOPE_API_KEY"),

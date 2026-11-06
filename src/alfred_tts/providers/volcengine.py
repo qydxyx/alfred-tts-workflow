@@ -52,7 +52,7 @@ class VolcengineTTSProvider(TTSProvider):
             "audio": {
                 "voice_type": voice,
                 "encoding": "mp3",
-                "speed_ratio": request.speed or 1.0,
+                "speed_ratio": self.resolved_speed(request),
             },
             "request": {
                 "reqid": str(uuid.uuid4()),

@@ -200,7 +200,7 @@ wheels = [
 
 [[package]]
 name = "alfred-tts-workflow"
-version = "0.2.1"
+version = "0.2.2"
 source = { editable = "." }
 dependencies = [
     { name = "edge-tts" },

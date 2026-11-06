@@ -25,6 +25,7 @@ def alfred_env(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> dict[str, Pat
     monkeypatch.setenv("OPENAI_INSTRUCTIONS", "")
     monkeypatch.setenv("ELEVENLABS_API_KEY", "")
     monkeypatch.setenv("ELEVENLABS_MODEL", "eleven_flash_v2_5")
+    monkeypatch.setenv("ELEVENLABS_VOICE_ID", "")
     monkeypatch.setenv("DEEPGRAM_API_KEY", "")
     monkeypatch.setenv("XAI_API_KEY", "")
     monkeypatch.setenv("DASHSCOPE_API_KEY", "")

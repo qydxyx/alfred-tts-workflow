@@ -49,8 +49,10 @@ def test_universal_action_accepts_text() -> None:
 def test_api_key_fields_exist() -> None:
     variables = {item["variable"] for item in _plist()["userconfigurationconfig"]}
     for name in (
+        "SPEECH_RATE",
         "OPENAI_API_KEY",
         "ELEVENLABS_API_KEY",
+        "ELEVENLABS_VOICE_ID",
         "DEEPGRAM_API_KEY",
         "XAI_API_KEY",
         "DASHSCOPE_API_KEY",

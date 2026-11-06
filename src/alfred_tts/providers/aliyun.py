@@ -56,6 +56,7 @@ class AliyunTTSProvider(TTSProvider):
                 "voice": self.resolved_voice(request),
                 "format": "mp3",
                 "sample_rate": 22050,
+                "rate": self.resolved_speed(request),
             },
         }
         with httpx_client(self.settings, overseas=False) as client:

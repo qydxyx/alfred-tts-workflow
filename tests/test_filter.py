@@ -47,6 +47,16 @@ def test_filter_gemini_hidden_until_key(monkeypatch, capsys) -> None:
     assert any("Gemini" in title for title in titles)
 
 
+def test_filter_elevenlabs_voice_id_in_payload(monkeypatch, capsys) -> None:
+    monkeypatch.setenv("ELEVENLABS_API_KEY", "el-test")
+    data = _run_filter(monkeypatch, capsys, "@elevenlabs voice:customVoiceId123 你好")
+    assert len(data["items"]) == 1
+    payload = decode_payload(data["items"][0]["arg"])
+    assert payload["provider"] == "elevenlabs"
+    assert payload["voice"] == "customVoiceId123"
+    assert payload["text"] == "你好"
+
+
 def test_filter_openai_appears_with_key(monkeypatch, capsys) -> None:
     monkeypatch.setenv("OPENAI_API_KEY", "test-key")
     data = _run_filter(monkeypatch, capsys, "hello")

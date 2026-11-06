@@ -230,6 +230,20 @@ def main() -> None:
                     ("Kokoro", "kokoro"),
                 ],
             ),
+            popup(
+                "SPEECH_RATE",
+                "语速倍率",
+                "1.0 为原速。Edge、OpenAI、ElevenLabs Flash / Multilingual、阿里云、火山、Kokoro 生效。"
+                "Eleven v3 / v4 / v4 Turbo、Gemini、Deepgram、xAI 不支持，仍按 1.0 朗读并提示。",
+                "1.0",
+                [
+                    ("0.85 稍慢", "0.85"),
+                    ("1.0 正常", "1.0"),
+                    ("1.15 稍快", "1.15"),
+                    ("1.25 快", "1.25"),
+                    ("1.5 更快", "1.5"),
+                ],
+            ),
             filepicker("EXPORT_DIR", "导出目录", "⌥↩ 保存音频的位置", "~/Downloads/Alfred-TTS"),
             textfield(
                 "PROXY_URL",
@@ -280,12 +294,21 @@ def main() -> None:
                 placeholder="Speak in a calm, clear tone",
             ),
             textfield("ELEVENLABS_API_KEY", "ElevenLabs API Key", "填写后列表中出现 ElevenLabs"),
+            textfield(
+                "ELEVENLABS_VOICE_ID",
+                "ElevenLabs Voice ID",
+                "默认 Sarah，免费 API 可用。单次可写 tts @elevenlabs voice:VoiceID 文本",
+                "EXAVITQu4vr4xnSDxMaL",
+                placeholder="EXAVITQu4vr4xnSDxMaL",
+            ),
             popup(
                 "ELEVENLABS_MODEL",
                 "ElevenLabs 模型",
-                "flash 更低延迟；multilingual_v2 更细腻",
+                "v4 质量最高；v4 turbo 实时；flash 更低延迟",
                 "eleven_flash_v2_5",
                 [
+                    ("eleven_v4", "eleven_v4"),
+                    ("eleven_v4_turbo", "eleven_v4_turbo"),
                     ("eleven_flash_v2_5", "eleven_flash_v2_5"),
                     ("eleven_multilingual_v2", "eleven_multilingual_v2"),
                     ("eleven_v3", "eleven_v3"),
@@ -333,7 +356,7 @@ def main() -> None:
                 "http://127.0.0.1:8880/v1",
             ),
         ],
-        "version": "0.2.1",
+        "version": "0.2.2",
         "webaddress": "https://github.com/qydxyx/alfred-tts-workflow",
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)

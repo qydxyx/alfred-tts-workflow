@@ -49,6 +49,22 @@ class TTSProvider(ABC):
     def resolved_style(self, request: SynthesizeRequest) -> str:
         return request.style
 
+    def resolved_speed(self, request: SynthesizeRequest) -> float:
+        return _clamp_speed(request.speed, 0.5, 2.0)
+
+    def speed_notice(self, request: SynthesizeRequest) -> str:
+        return ""
+
     @abstractmethod
     def synthesize(self, request: SynthesizeRequest, dest: Path) -> Path:
         raise NotImplementedError
+
+
+def _clamp_speed(speed: float, low: float, high: float) -> float:
+    try:
+        value = float(speed)
+    except (TypeError, ValueError):
+        return 1.0
+    if value <= 0:
+        return 1.0
+    return min(high, max(low, value))

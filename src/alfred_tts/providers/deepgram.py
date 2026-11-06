@@ -23,6 +23,14 @@ class DeepgramTTSProvider(TTSProvider):
     def default_voice(self, text: str = "") -> str:
         return DEEPGRAM_VOICE_DEFAULT
 
+    def resolved_speed(self, request: SynthesizeRequest) -> float:
+        return 1.0
+
+    def speed_notice(self, request: SynthesizeRequest) -> str:
+        if abs((request.speed or 1.0) - 1.0) < 0.001:
+            return ""
+        return "Deepgram Aura 没有语速倍率，已按原速朗读。"
+
     def preset_voices(self) -> list[VoicePreset]:
         return [
             VoicePreset("aura-2-thalia-en", "Thalia · en"),

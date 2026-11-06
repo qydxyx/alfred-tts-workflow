@@ -45,7 +45,8 @@ class EdgeTTSProvider(TTSProvider):
         proxy = self.settings.proxy_url
 
         async def _run() -> None:
-            communicate = edge_tts.Communicate(request.text, voice)
+            rate = _edge_rate(self.resolved_speed(request))
+            communicate = edge_tts.Communicate(request.text, voice, rate=rate)
             if proxy:
                 # edge-tts talks to Microsoft cloud; honour the same overseas proxy.
                 import os
@@ -60,3 +61,9 @@ class EdgeTTSProvider(TTSProvider):
         if not dest.exists() or dest.stat().st_size == 0:
             raise RuntimeError("Edge TTS 返回空音频")
         return dest
+
+
+def _edge_rate(speed: float) -> str:
+    percent = round((speed - 1.0) * 100)
+    percent = max(-50, min(100, percent))
+    return f"{percent:+d}%"
