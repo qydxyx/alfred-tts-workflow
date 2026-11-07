@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.11"
 resolution-markers = [
     "python_full_version >= '3.14'",
@@ -200,7 +200,6 @@ wheels = [
 
 [[package]]
 name = "alfred-tts-workflow"
-version = "0.2.2"
 source = { editable = "." }
 dependencies = [
     { name = "edge-tts" },
@@ -220,6 +219,13 @@ kokoro = [
     { name = "soundfile" },
 ]
 
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "ruff" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "edge-tts", specifier = ">=7.3.1" },
@@ -233,6 +239,13 @@ requires-dist = [
     { name = "soundfile", marker = "extra == 'kokoro'", specifier = ">=0.13.0" },
 ]
 provides-extras = ["kokoro", "dev"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pytest", specifier = ">=8.3.0" },
+    { name = "pytest-asyncio", specifier = ">=0.25.0" },
+    { name = "ruff", specifier = ">=0.9.0" },
+]
 
 [[package]]
 name = "annotated-types"

@@ -60,3 +60,9 @@ def test_api_key_fields_exist() -> None:
         "VOLC_TOKEN",
     ):
         assert name in variables
+
+
+def test_version_matches_package() -> None:
+    from alfred_tts import __version__
+
+    assert _plist()["version"] == __version__

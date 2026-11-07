@@ -28,6 +28,20 @@ def test_parse_hash_voice_id() -> None:
     assert parsed.text == "hello"
 
 
+def test_parse_markdown_heading_not_voice() -> None:
+    parsed = parse_query("# Introduction to Python")
+    assert parsed.provider is None
+    assert parsed.voice is None
+    assert parsed.text == "# Introduction to Python"
+
+
+def test_parse_provider_hash_voice() -> None:
+    parsed = parse_query("@elevenlabs #customVoice123 hello")
+    assert parsed.provider == "elevenlabs"
+    assert parsed.voice == "customVoice123"
+    assert parsed.text == "hello"
+
+
 def test_parse_stop() -> None:
     assert parse_query("stop").is_stop is True
     assert parse_query("STOP").is_stop is True

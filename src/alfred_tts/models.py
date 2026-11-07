@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 from enum import StrEnum
-from pathlib import Path
 from typing import Any
 
 
@@ -18,7 +17,6 @@ class Action(StrEnum):
     SET_DEFAULT = "set_default"
     SET_VOICE = "set_voice"
     CLEAR_CACHE = "clear_cache"
-    OPEN_CONFIG = "open_config"
 
 
 @dataclass(slots=True)
@@ -29,14 +27,6 @@ class SynthesizeRequest:
     model: str = ""
     speed: float = 1.0
     style: str = ""
-
-
-@dataclass(slots=True)
-class SynthesizeResult:
-    path: Path
-    provider: str
-    cached: bool = False
-    suffix: str = ".mp3"
 
 
 @dataclass(slots=True)

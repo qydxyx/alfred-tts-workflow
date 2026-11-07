@@ -14,22 +14,22 @@ CMD="${1:-filter}"
 shift || true
 
 emit_setup() {
-  local title="$1"
-  local subtitle="$2"
-  local action="$3"
-  python3 -c "
+  python3 - "$1" "$2" "$3" << 'EOF'
 import json
+import sys
+
+title, subtitle, action = sys.argv[1], sys.argv[2], sys.argv[3]
 print(json.dumps({
   'skipknowledge': True,
   'items': [{
-    'title': '''${title}''',
-    'subtitle': '''${subtitle}''',
-    'arg': '''${action}''',
+    'title': title,
+    'subtitle': subtitle,
+    'arg': action,
     'valid': True,
-    'variables': {'tts_action': '''${action}'''}
+    'variables': {'tts_action': action}
   }]
 }, ensure_ascii=False))
-"
+EOF
 }
 
 if [[ -z "${alfred_workflow_data:-}" ]]; then
@@ -60,7 +60,8 @@ if [[ ! -x "${PY}" ]]; then
       'httpx[socks]>=0.28.0' 'edge-tts>=7.3.1' 'google-genai>=2.30.1'
     PY="${alfred_workflow_data}/.venv/bin/python"
   else
-    echo "uv is required" >&2
+    osascript -e 'display alert "Alfred TTS 初始化失败" message "未检测到 uv 工具。请在终端执行安装：\ncurl -LsSf https://astral.sh/uv/install.sh | sh"' 2>/dev/null || true
+    echo "uv is required: curl -LsSf https://astral.sh/uv/install.sh | sh" >&2
     exit 1
   fi
 fi

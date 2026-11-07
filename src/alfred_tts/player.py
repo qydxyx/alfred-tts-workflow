@@ -19,6 +19,22 @@ def clipboard_dir() -> Path:
     return path
 
 
+def _is_afplay_process(pid: int) -> bool:
+    try:
+        res = subprocess.run(
+            ["ps", "-p", str(pid), "-o", "comm="],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if res.returncode != 0:
+            return True
+        comm = (res.stdout or "").strip()
+        return "afplay" in comm
+    except Exception:
+        return True
+
+
 def stop_playback() -> bool:
     path = pid_path()
     if not path.exists():
@@ -26,6 +42,9 @@ def stop_playback() -> bool:
     try:
         pid = int(path.read_text(encoding="utf-8").strip())
     except (OSError, ValueError):
+        path.unlink(missing_ok=True)
+        return False
+    if not _is_afplay_process(pid):
         path.unlink(missing_ok=True)
         return False
     try:
@@ -53,9 +72,12 @@ def play_audio(path: Path) -> None:
 def copy_audio_file_to_clipboard(path: Path, label_text: str) -> Path:
     dest = clipboard_dir() / f"{slug(label_text)}{path.suffix}"
     dest.write_bytes(path.read_bytes())
-    posix = str(dest)
-    script = f'set the clipboard to (POSIX file "{posix}")'
-    subprocess.run(["/usr/bin/osascript", "-e", script], check=True, capture_output=True)
+    script = "on run argv\nset the clipboard to (POSIX file (item 1 of argv))\nend run"
+    subprocess.run(
+        ["/usr/bin/osascript", "-e", script, str(dest.resolve())],
+        check=True,
+        capture_output=True,
+    )
     return dest
 
 
@@ -71,7 +93,9 @@ def save_and_reveal(path: Path, export_dir: Path, provider: str, text: str) -> P
 
 
 def notify(title: str, message: str) -> None:
-    escaped_title = title.replace("\\", "\\\\").replace('"', '\\"')
-    escaped_message = message.replace("\\", "\\\\").replace('"', '\\"')
-    script = f'display notification "{escaped_message}" with title "{escaped_title}"'
-    subprocess.run(["/usr/bin/osascript", "-e", script], check=False, capture_output=True)
+    script = "on run argv\ndisplay notification (item 2 of argv) with title (item 1 of argv)\nend run"
+    subprocess.run(
+        ["/usr/bin/osascript", "-e", script, str(title), str(message)],
+        check=False,
+        capture_output=True,
+    )

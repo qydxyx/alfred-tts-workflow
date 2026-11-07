@@ -1,0 +1,63 @@
+name: CI
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+          enable-cache: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Lint
+        run: uv run ruff check src tests scripts
+
+      - name: Run tests
+        run: uv run pytest -v tests/
+
+      - name: Verify info.plist generation is up-to-date
+        run: |
+          uv run python scripts/generate_info_plist.py
+          git diff --exit-code workflow/info.plist || (echo "workflow/info.plist is outdated, run make build" && exit 1)
+
+  release:
+    needs: lint-and-test
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: macos-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Build workflow artifact
+        run: make build
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/Alfred-TTS.alfredworkflow
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

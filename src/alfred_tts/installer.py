@@ -78,6 +78,36 @@ def kokoro_files_ready(variant: str | None = None) -> str | None:
     return None
 
 
+def kokoro_packages_installed() -> bool:
+    try:
+        import kokoro_onnx  # noqa: F401
+        import misaki  # noqa: F401
+        import soundfile  # noqa: F401
+        return True
+    except ImportError:
+        return False
+
+
+def is_kokoro_installing(state: dict | None = None) -> bool:
+    from alfred_tts.config import load_state
+
+    current = state if state is not None else load_state()
+    kokoro = current.get("kokoro") if isinstance(current.get("kokoro"), dict) else {}
+    if kokoro.get("install_status") != "installing":
+        return False
+    pid = kokoro.get("install_pid")
+    if not pid:
+        return True
+    try:
+        pid_int = int(pid)
+        os.kill(pid_int, 0)
+        return True
+    except (OSError, ValueError):
+        # Process is dead; heal state
+        update_state(kokoro={"install_status": "error", "install_pid": 0, "last_error": "安装进程意外终止"})
+        return False
+
+
 def _run(cmd: list[str]) -> None:
     subprocess.run(cmd, check=True)
 
@@ -93,24 +123,35 @@ def setup_core_venv() -> Path:
     return python
 
 
-def _download(url: str, dest: Path) -> None:
+def _download(url: str, dest: Path, proxy: str = "") -> None:
     dest.parent.mkdir(parents=True, exist_ok=True)
     part = dest.with_suffix(dest.suffix + ".part")
-    with httpx.stream("GET", url, follow_redirects=True, timeout=120.0) as response:
-        response.raise_for_status()
-        with part.open("wb") as handle:
-            for chunk in response.iter_bytes(1024 * 256):
-                handle.write(chunk)
+    client_kwargs: dict[str, object] = {
+        "follow_redirects": True,
+        "timeout": httpx.Timeout(300.0, connect=30.0),
+    }
+    if proxy:
+        client_kwargs["proxy"] = proxy
+    with httpx.Client(**client_kwargs) as client:
+        with client.stream("GET", url) as response:
+            response.raise_for_status()
+            with part.open("wb") as handle:
+                for chunk in response.iter_bytes(1024 * 256):
+                    handle.write(chunk)
     if part.stat().st_size <= 0:
         part.unlink(missing_ok=True)
         raise RuntimeError(f"下载为空: {url}")
     part.replace(dest)
 
 
-def install_kokoro(variant: str = "fp32") -> None:
+def install_kokoro(variant: str = "fp32", proxy: str = "") -> None:
     if variant not in KOKORO_FILES:
         raise ValueError(f"未知 Kokoro 变体: {variant}")
-    update_state(kokoro={"install_status": "installing", "installed_variant": ""})
+    from alfred_tts.config import load_settings
+
+    settings = load_settings()
+    proxy = proxy or settings.proxy_url
+    update_state(kokoro={"install_status": "installing", "installed_variant": "", "install_pid": os.getpid()})
     notify("Alfred TTS", f"正在后台安装 Kokoro（{KOKORO_FILES[variant]['size_label']}）…")
     try:
         if not core_venv_ready():
@@ -121,12 +162,12 @@ def install_kokoro(variant: str = "fp32") -> None:
         _run([str(uv), "pip", "install", "--python", str(venv_python()), *KOKORO_PACKAGES])
         spec = KOKORO_FILES[variant]
         model_dest, voices_dest = kokoro_model_paths(variant)
-        _download(f"{KOKORO_RELEASE}/{spec['model']}", model_dest)
-        _download(f"{KOKORO_RELEASE}/{spec['voices']}", voices_dest)
-        update_state(kokoro={"install_status": "idle", "installed_variant": variant})
+        _download(f"{KOKORO_RELEASE}/{spec['model']}", model_dest, proxy=proxy)
+        _download(f"{KOKORO_RELEASE}/{spec['voices']}", voices_dest, proxy=proxy)
+        update_state(kokoro={"install_status": "idle", "installed_variant": variant, "install_pid": 0})
         notify("Alfred TTS", "Kokoro 已就绪，可输入 tts @kokoro 使用")
     except Exception as exc:
-        update_state(kokoro={"install_status": "error", "last_error": str(exc)})
+        update_state(kokoro={"install_status": "error", "last_error": str(exc), "install_pid": 0})
         notify("Alfred TTS", f"Kokoro 安装失败: {exc}")
         raise
 
@@ -139,17 +180,17 @@ def remove_kokoro_models() -> int:
             if path.is_file():
                 path.unlink()
                 removed += 1
-    update_state(kokoro={"install_status": "idle", "installed_variant": ""})
+    update_state(kokoro={"install_status": "idle", "installed_variant": "", "install_pid": 0})
     return removed
 
 
 def spawn_install_kokoro(variant: str) -> None:
-    update_state(kokoro={"install_status": "installing"})
     log = data_dir() / "install-kokoro.log"
     with log.open("ab") as handle:
-        subprocess.Popen(
+        proc = subprocess.Popen(
             [sys.executable, "-m", "alfred_tts", "install-kokoro", "--variant", variant],
             stdout=handle,
             stderr=handle,
             start_new_session=True,
         )
+    update_state(kokoro={"install_status": "installing", "install_pid": proc.pid})

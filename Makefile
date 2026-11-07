@@ -32,5 +32,5 @@ build:
 	cp workflow/icon.png build/workflow/icon.png 2>/dev/null || true
 	chmod +x build/workflow/scripts/bootstrap.sh
 	cd build/workflow && zip -qry ../../dist/Alfred-TTS.alfredworkflow .
-	plutil -lint workflow/info.plist
+	@if command -v plutil >/dev/null 2>&1; then plutil -lint workflow/info.plist; fi
 	@echo "Built dist/Alfred-TTS.alfredworkflow"

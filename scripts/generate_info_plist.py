@@ -4,9 +4,28 @@
 from __future__ import annotations
 
 import plistlib
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
+
+from alfred_tts import __version__  # noqa: E402
+from alfred_tts.config import (  # noqa: E402
+    ALIYUN_BASE_DEFAULT,
+    ALIYUN_MODEL_DEFAULT,
+    DEFAULT_PROVIDER,
+    ELEVENLABS_MODEL_DEFAULT,
+    EXPORT_DIR_DEFAULT,
+    GEMINI_MODEL_DEFAULT,
+    KOKORO_API_BASE_DEFAULT,
+    KOKORO_MODE_DEFAULT,
+    OPENAI_BASE_DEFAULT,
+    OPENAI_MODEL_DEFAULT,
+    SPEECH_RATE_DEFAULT,
+    VOLC_CLUSTER_DEFAULT,
+)
+
 OUT = ROOT / "workflow" / "info.plist"
 
 FILTER = "a11ed001-0001-4000-8000-000000000001"
@@ -217,7 +236,7 @@ def main() -> None:
                 "DEFAULT_PROVIDER",
                 "默认引擎",
                 "日常 tts 回车使用的引擎（仍可在列表中选其他已就绪引擎）",
-                "edge",
+                DEFAULT_PROVIDER,
                 [
                     ("Edge TTS", "edge"),
                     ("Gemini TTS", "gemini"),
@@ -235,7 +254,7 @@ def main() -> None:
                 "语速倍率",
                 "1.0 为原速。Edge、OpenAI、ElevenLabs Flash / Multilingual、阿里云、火山、Kokoro 生效。"
                 "Eleven v3 / v4 / v4 Turbo、Gemini、Deepgram、xAI 不支持，仍按 1.0 朗读并提示。",
-                "1.0",
+                f"{SPEECH_RATE_DEFAULT:.1f}",
                 [
                     ("0.85 稍慢", "0.85"),
                     ("1.0 正常", "1.0"),
@@ -244,7 +263,7 @@ def main() -> None:
                     ("1.5 更快", "1.5"),
                 ],
             ),
-            filepicker("EXPORT_DIR", "导出目录", "⌥↩ 保存音频的位置", "~/Downloads/Alfred-TTS"),
+            filepicker("EXPORT_DIR", "导出目录", "⌥↩ 保存音频的位置", EXPORT_DIR_DEFAULT),
             textfield(
                 "PROXY_URL",
                 "海外代理",
@@ -256,7 +275,7 @@ def main() -> None:
                 "GEMINI_MODEL",
                 "Gemini 模型",
                 "lite 更低延迟；flash 表现力更强",
-                "gemini-3.8-flash-lite-tts",
+                GEMINI_MODEL_DEFAULT,
                 [
                     ("gemini-3.8-flash-lite-tts", "gemini-3.8-flash-lite-tts"),
                     ("gemini-3.8-flash-tts", "gemini-3.8-flash-tts"),
@@ -273,14 +292,14 @@ def main() -> None:
                 "OPENAI_BASE_URL",
                 "OpenAI Base URL",
                 "兼容 /v1/audio/speech 的网关，可留空使用官方地址",
-                "https://api.openai.com/v1",
-                placeholder="https://api.openai.com/v1",
+                OPENAI_BASE_DEFAULT,
+                placeholder=OPENAI_BASE_DEFAULT,
             ),
             popup(
                 "OPENAI_MODEL",
                 "OpenAI 模型",
                 "gpt-4o-mini-tts 支持语气指令；tts-1 更低延迟",
-                "gpt-4o-mini-tts",
+                OPENAI_MODEL_DEFAULT,
                 [
                     ("gpt-4o-mini-tts", "gpt-4o-mini-tts"),
                     ("tts-1", "tts-1"),
@@ -305,7 +324,7 @@ def main() -> None:
                 "ELEVENLABS_MODEL",
                 "ElevenLabs 模型",
                 "v4 质量最高；v4 turbo 实时；flash 更低延迟",
-                "eleven_flash_v2_5",
+                ELEVENLABS_MODEL_DEFAULT,
                 [
                     ("eleven_v4", "eleven_v4"),
                     ("eleven_v4_turbo", "eleven_v4_turbo"),
@@ -321,13 +340,13 @@ def main() -> None:
                 "DASHSCOPE_BASE_URL",
                 "百炼 Base URL",
                 "国内默认北京；国际站改为 dashscope-intl.aliyuncs.com/api/v1",
-                "https://dashscope.aliyuncs.com/api/v1",
+                ALIYUN_BASE_DEFAULT,
             ),
             popup(
                 "ALIYUN_MODEL",
                 "百炼模型",
                 "v3 带系统音色；v3.5 仅支持复刻/设计音色",
-                "cosyvoice-v3-flash",
+                ALIYUN_MODEL_DEFAULT,
                 [
                     ("cosyvoice-v3-flash", "cosyvoice-v3-flash"),
                     ("cosyvoice-v3-plus", "cosyvoice-v3-plus"),
@@ -340,23 +359,23 @@ def main() -> None:
                 "VOLC_CLUSTER",
                 "火山引擎 Cluster",
                 "普通音色 volcano_tts；豆包 ICL 音色会自动切到 volcano_icl",
-                "volcano_tts",
+                VOLC_CLUSTER_DEFAULT,
             ),
             popup(
                 "KOKORO_MODE",
                 "Kokoro 模式",
                 "auto 优先本地 API，否则使用已安装的 ONNX 模型",
-                "auto",
+                KOKORO_MODE_DEFAULT,
                 [("auto", "auto"), ("onnx", "onnx"), ("api", "api")],
             ),
             textfield(
                 "KOKORO_API_BASE",
                 "Kokoro API",
                 "本地 OpenAI 兼容端点，默认 Kokoro-FastAPI",
-                "http://127.0.0.1:8880/v1",
+                KOKORO_API_BASE_DEFAULT,
             ),
         ],
-        "version": "0.2.2",
+        "version": __version__,
         "webaddress": "https://github.com/qydxyx/alfred-tts-workflow",
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)

@@ -7,11 +7,12 @@ from pathlib import Path
 
 from alfred_tts.cache import clear as clear_cache
 from alfred_tts.cache import lookup, store
-from alfred_tts.config import load_settings, update_state, voice_for
+from alfred_tts.config import Settings, load_settings, update_state, voice_for
 from alfred_tts.installer import (
     KOKORO_FILES,
     core_venv_ready,
     install_kokoro,
+    is_kokoro_installing,
     remove_kokoro_models,
     setup_core_venv,
     spawn_install_kokoro,
@@ -109,7 +110,7 @@ def _cmd_filter(query: str) -> AlfredResponse:
     settings = load_settings()
     registry = ProviderRegistry(settings)
 
-    if settings.kokoro_install_status == "installing" and (
+    if is_kokoro_installing() and (
         parsed.provider in {None, "kokoro"} or not parsed.text
     ):
         installing = AlfredItem(
@@ -174,7 +175,7 @@ def _cmd_filter(query: str) -> AlfredResponse:
     if not providers:
         return AlfredResponse(items=[AlfredItem(title="没有已就绪的引擎", valid=False)])
 
-    items = [_synth_item(provider, parsed, settings.default_provider) for provider in providers]
+    items = [_synth_item(provider, parsed, settings) for provider in providers]
     return AlfredResponse(items=items)
 
 
@@ -216,14 +217,18 @@ def _cmd_config_filter(query: str) -> AlfredResponse:
                 )
             )
 
-    items.extend(_kokoro_install_items(ParsedQuery(raw="", text=""), include_remove=True))
-    items.append(
+    extra_items = [
+        *_kokoro_install_items(ParsedQuery(raw="", text=""), include_remove=True),
         _action_item(
             title="清空音频缓存",
             subtitle="删除已合成的本地缓存文件",
             action=Action.CLEAR_CACHE,
-        )
-    )
+        ),
+    ]
+    for extra in extra_items:
+        if needle and needle not in extra.title.lower() and needle not in extra.subtitle.lower():
+            continue
+        items.append(extra)
     return AlfredResponse(items=items)
 
 
@@ -259,21 +264,19 @@ def _cmd_run(arg: str) -> int:
             count = clear_cache()
             notify("Alfred TTS", f"已清空 {count} 个缓存文件")
             return 0
-        if action == Action.OPEN_CONFIG:
-            return 0
 
+        settings = load_settings()
         text = str(payload.get("text") or "")
-        provider_id = str(payload.get("provider") or load_settings().default_provider)
+        provider_id = str(payload.get("provider") or settings.default_provider)
         if not text.strip():
             notify("Alfred TTS", "没有可朗读的文本")
             return 1
-        result = _synthesize(provider_id, text, voice=str(payload.get("voice") or ""))
+        result = _synthesize(provider_id, text, voice=str(payload.get("voice") or ""), settings=settings)
         if action == Action.COPY_FILE:
             copy_audio_file_to_clipboard(result, text)
             notify("Alfred TTS", "音频文件已复制到剪贴板")
             return 0
         if action == Action.SAVE:
-            settings = load_settings()
             save_and_reveal(result, settings.export_path, provider_id, text)
             return 0
         play_audio(result)
@@ -300,33 +303,33 @@ def _cmd_setup() -> int:
         return 1
 
 
-def _request_for(provider, text: str, voice: str) -> SynthesizeRequest:
-    settings = load_settings()
+def _request_for(provider, text: str, voice: str, settings: Settings | None = None) -> SynthesizeRequest:
+    cfg = settings or load_settings()
     draft = SynthesizeRequest(provider=provider.id, text=text)
     request = SynthesizeRequest(
         provider=provider.id,
         text=text,
-        voice=voice or voice_for(settings, provider.id),
+        voice=voice or voice_for(cfg, provider.id),
         model=provider.resolved_model(draft),
         style=provider.resolved_style(draft),
-        speed=settings.speech_rate,
+        speed=cfg.speech_rate,
     )
     request.voice = provider.resolved_voice(request)
     request.speed = provider.resolved_speed(request)
     return request
 
 
-def _synthesize(provider_id: str, text: str, voice: str = "") -> Path:
-    settings = load_settings()
-    registry = ProviderRegistry(settings)
+def _synthesize(provider_id: str, text: str, voice: str = "", settings: Settings | None = None) -> Path:
+    cfg = settings or load_settings()
+    registry = ProviderRegistry(cfg)
     provider = registry.get(provider_id)
-    request = _request_for(provider, text, voice)
+    request = _request_for(provider, text, voice, cfg)
     notice = provider.speed_notice(
         SynthesizeRequest(
             provider=provider.id,
             text=text,
             model=request.model,
-            speed=settings.speech_rate,
+            speed=cfg.speech_rate,
         )
     )
     if notice:
@@ -340,11 +343,11 @@ def _synthesize(provider_id: str, text: str, voice: str = "") -> Path:
         return store(request, produced)
 
 
-def _synth_item(provider, parsed: ParsedQuery, default_id: str) -> AlfredItem:
-    request = _request_for(provider, parsed.text, parsed.voice)
+def _synth_item(provider, parsed: ParsedQuery, settings: Settings) -> AlfredItem:
+    request = _request_for(provider, parsed.text, parsed.voice, settings)
     cached = lookup(request) is not None
     prefix = "⚡ 已缓存 · " if cached else ""
-    default_mark = "（默认）" if provider.id == default_id else ""
+    default_mark = "（默认）" if provider.id == settings.default_provider else ""
     payload = {
         "provider": provider.id,
         "text": parsed.text,

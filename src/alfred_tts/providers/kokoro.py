@@ -6,7 +6,7 @@ from pathlib import Path
 import httpx
 
 from alfred_tts.config import KOKORO_API_PROBE_TTL_S, load_state, models_dir, update_state
-from alfred_tts.installer import kokoro_files_ready, kokoro_model_paths
+from alfred_tts.installer import kokoro_files_ready, kokoro_model_paths, kokoro_packages_installed
 from alfred_tts.models import SynthesizeRequest
 from alfred_tts.providers.base import TTSProvider, VoicePreset
 from alfred_tts.query import has_cjk
@@ -18,7 +18,11 @@ class KokoroProvider(TTSProvider):
     icon = "icons/kokoro.png"
 
     def is_ready(self, eager_probe: bool = False) -> bool:
-        if self.settings.kokoro_mode in {"onnx", "auto"} and kokoro_files_ready():
+        if (
+            self.settings.kokoro_mode in {"onnx", "auto"}
+            and kokoro_files_ready()
+            and kokoro_packages_installed()
+        ):
             return True
         if self.settings.kokoro_mode in {"api", "auto"}:
             return self._cached_api_ready(probe=eager_probe or self.settings.kokoro_mode == "api")
@@ -27,7 +31,7 @@ class KokoroProvider(TTSProvider):
     def needs_install(self) -> bool:
         if self.settings.kokoro_mode == "api":
             return not self._cached_api_ready(force=True)
-        if kokoro_files_ready():
+        if kokoro_files_ready() and kokoro_packages_installed():
             return False
         if self.settings.kokoro_mode == "onnx":
             return True

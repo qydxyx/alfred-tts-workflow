@@ -46,15 +46,7 @@ class EdgeTTSProvider(TTSProvider):
 
         async def _run() -> None:
             rate = _edge_rate(self.resolved_speed(request))
-            communicate = edge_tts.Communicate(request.text, voice, rate=rate)
-            if proxy:
-                # edge-tts talks to Microsoft cloud; honour the same overseas proxy.
-                import os
-
-                os.environ.setdefault("HTTPS_PROXY", proxy)
-                os.environ.setdefault("HTTP_PROXY", proxy)
-                os.environ.setdefault("https_proxy", proxy)
-                os.environ.setdefault("http_proxy", proxy)
+            communicate = edge_tts.Communicate(request.text, voice, rate=rate, proxy=proxy or None)
             await communicate.save(str(dest))
 
         asyncio.run(_run())

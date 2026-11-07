@@ -23,9 +23,16 @@ def test_cache_key_stable_for_stripped_text() -> None:
 
 
 def test_clear_removes_files(tmp_path: Path) -> None:
+    from alfred_tts.config import cache_dir
+
     request = SynthesizeRequest(provider="edge", text="bye")
     source = tmp_path / "a.mp3"
     source.write_bytes(b"xx")
     store(request, source)
-    assert clear() >= 1
+    clip_file = cache_dir() / "clipboard" / "clip.mp3"
+    clip_file.parent.mkdir(parents=True, exist_ok=True)
+    clip_file.write_bytes(b"yy")
+
+    assert clear() >= 2
     assert lookup(request) is None
+    assert not clip_file.exists()

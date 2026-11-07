@@ -81,9 +81,15 @@ def load_state() -> dict[str, Any]:
 
 def save_state(state: dict[str, Any]) -> None:
     path = state_path()
-    tmp = path.with_suffix(".json.tmp")
-    tmp.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
-    tmp.replace(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    import tempfile
+
+    with tempfile.NamedTemporaryFile(
+        "w", dir=path.parent, prefix="state-", suffix=".tmp", delete=False, encoding="utf-8"
+    ) as handle:
+        handle.write(json.dumps(state, ensure_ascii=False, indent=2))
+        tmp_name = handle.name
+    Path(tmp_name).replace(path)
 
 
 def update_state(**kwargs: Any) -> dict[str, Any]:

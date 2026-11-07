@@ -6,9 +6,6 @@ import httpx
 
 from alfred_tts.config import Settings
 
-# 海外云走 PROXY_URL；国内云与本地回环直连。
-OVERSEAS_PROVIDERS = frozenset({"edge", "gemini", "openai", "elevenlabs", "deepgram", "xai"})
-
 
 def httpx_client(settings: Settings, *, overseas: bool, timeout: float = 60.0) -> httpx.Client:
     kwargs: dict[str, Any] = {"timeout": timeout, "trust_env": False, "follow_redirects": True}

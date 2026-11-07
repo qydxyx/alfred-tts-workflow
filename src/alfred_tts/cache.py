@@ -48,9 +48,15 @@ def _load_index() -> list[dict[str, str]]:
 
 def _save_index(entries: list[dict[str, str]]) -> None:
     path = index_path()
-    tmp = path.with_suffix(".json.tmp")
-    tmp.write_text(json.dumps(entries, ensure_ascii=False), encoding="utf-8")
-    tmp.replace(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    import tempfile
+
+    with tempfile.NamedTemporaryFile(
+        "w", dir=path.parent, prefix="index-", suffix=".tmp", delete=False, encoding="utf-8"
+    ) as handle:
+        handle.write(json.dumps(entries, ensure_ascii=False))
+        tmp_name = handle.name
+    Path(tmp_name).replace(path)
 
 
 def lookup(request: SynthesizeRequest) -> Path | None:
@@ -80,9 +86,11 @@ def store(request: SynthesizeRequest, source: Path) -> Path:
 
 def clear() -> int:
     removed = 0
-    directory = audio_dir()
-    for path in directory.iterdir():
-        if path.is_file():
-            path.unlink()
-            removed += 1
+    for target in (audio_dir(), cache_dir() / "clipboard"):
+        if not target.exists():
+            continue
+        for path in target.iterdir():
+            if path.is_file():
+                path.unlink(missing_ok=True)
+                removed += 1
     return removed
